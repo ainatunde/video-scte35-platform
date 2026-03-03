@@ -49,7 +49,14 @@ async def start_channel(db: AsyncSession, channel: Channel) -> Channel:
     channel.status = "starting"
     await db.commit()
     await db.refresh(channel)
-    await publish(WORKER_CONTROL_CHANNEL, {"action": "start", "channel_id": str(channel.id)})
+    await publish(WORKER_CONTROL_CHANNEL, {
+        "action": "start",
+        "channel_id": str(channel.id),
+        "name": channel.name,
+        "input_protocol": channel.input_protocol,
+        "input_url": channel.input_url,
+        "output_dir": channel.output_dir,
+    })
     logger.info("Sent start command for channel %s", channel.id)
     return channel
 
@@ -58,7 +65,10 @@ async def stop_channel(db: AsyncSession, channel: Channel) -> Channel:
     channel.status = "stopping"
     await db.commit()
     await db.refresh(channel)
-    await publish(WORKER_CONTROL_CHANNEL, {"action": "stop", "channel_id": str(channel.id)})
+    await publish(WORKER_CONTROL_CHANNEL, {
+        "action": "stop",
+        "channel_id": str(channel.id),
+    })
     logger.info("Sent stop command for channel %s", channel.id)
     return channel
 
@@ -67,6 +77,13 @@ async def restart_channel(db: AsyncSession, channel: Channel) -> Channel:
     channel.status = "restarting"
     await db.commit()
     await db.refresh(channel)
-    await publish(WORKER_CONTROL_CHANNEL, {"action": "restart", "channel_id": str(channel.id)})
+    await publish(WORKER_CONTROL_CHANNEL, {
+        "action": "restart",
+        "channel_id": str(channel.id),
+        "name": channel.name,
+        "input_protocol": channel.input_protocol,
+        "input_url": channel.input_url,
+        "output_dir": channel.output_dir,
+    })
     logger.info("Sent restart command for channel %s", channel.id)
     return channel
