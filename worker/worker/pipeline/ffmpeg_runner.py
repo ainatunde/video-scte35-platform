@@ -51,10 +51,7 @@ def build_ffmpeg_command(config: PipelineConfig) -> list[str]:
         "-i", config.input_url,
     ]
 
-    # Filter complex for multi-resolution
-    filter_parts = []
-    for i, r in enumerate(ABR_RENDITIONS):
-        filter_parts.append(f"[v{i}]")
+    # Filter complex for multi-resolution split + scale
     split = f"[0:v]split={len(ABR_RENDITIONS)}" + "".join(f"[v{i}]" for i in range(len(ABR_RENDITIONS)))
     scale_parts = []
     for i, r in enumerate(ABR_RENDITIONS):

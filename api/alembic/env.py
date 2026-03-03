@@ -16,6 +16,17 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# Override sqlalchemy.url from DATABASE_URL environment variable when present.
+# Converts asyncpg URL to a synchronous psycopg2 URL for Alembic's sync engine.
+_env_db_url = os.environ.get("DATABASE_URL")
+if _env_db_url:
+    _sync_url = (
+        _env_db_url
+        .replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+        .replace("postgres://", "postgresql+psycopg2://")
+    )
+    config.set_main_option("sqlalchemy.url", _sync_url)
+
 target_metadata = Base.metadata
 
 

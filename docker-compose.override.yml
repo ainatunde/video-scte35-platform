@@ -1,0 +1,16 @@
+# docker-compose.override.yml
+# Applied automatically by `docker compose up` for local development.
+# Mounts source directories into containers so code changes are picked up
+# without rebuilding the image.
+# DO NOT use in production — source mounts shadow the installed packages.
+services:
+  api:
+    volumes:
+      - ./api:/app
+      - hls_data:/data/hls
+    command: sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --reload"
+
+  worker:
+    volumes:
+      - ./worker:/app
+      - hls_data:/data/hls

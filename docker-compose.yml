@@ -2,13 +2,13 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: scte35
-      POSTGRES_PASSWORD: scte35pass
-      POSTGRES_DB: scte35db
+      POSTGRES_USER: ${POSTGRES_USER:-scte35}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-scte35pass}
+      POSTGRES_DB: ${POSTGRES_DB:-scte35db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U scte35 -d scte35db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-scte35} -d ${POSTGRES_DB:-scte35db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,14 +30,9 @@ services:
       context: ./api
       dockerfile: Dockerfile
     env_file: .env
-    environment:
-      DATABASE_URL: postgresql+asyncpg://scte35:scte35pass@postgres:5432/scte35db
-      REDIS_URL: redis://redis:6379/0
-      LOG_LEVEL: INFO
     ports:
       - "8000:8000"
     volumes:
-      - ./api:/app
       - hls_data:/data/hls
     depends_on:
       postgres:
@@ -52,13 +47,7 @@ services:
       context: ./worker
       dockerfile: Dockerfile
     env_file: .env
-    environment:
-      DATABASE_URL: postgresql+psycopg2://scte35:scte35pass@postgres:5432/scte35db
-      REDIS_URL: redis://redis:6379/0
-      OUTPUT_BASE_DIR: /data/hls
-      LOG_LEVEL: INFO
     volumes:
-      - ./worker:/app
       - hls_data:/data/hls
     depends_on:
       postgres:

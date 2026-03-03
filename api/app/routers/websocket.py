@@ -22,14 +22,14 @@ async def websocket_endpoint(websocket: WebSocket, channel_id: uuid.UUID):
     receive_task = asyncio.create_task(websocket.receive_text())
     try:
         while True:
-            message = await asyncio.wait_for(
-                pubsub.get_message(ignore_subscribe_messages=True), timeout=1.0
-            )
+            # timeout=1.0 lets redis-py yield control each second rather than
+            # spinning in a tight loop when there are no messages.
+            message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
             if message and message.get("type") == "message":
                 await websocket.send_text(message["data"])
 
             if receive_task.done():
-                # Client sent a message (e.g. ping); reset and continue
+                # Re-raise any exception from the receive task (e.g. WebSocketDisconnect)
                 receive_task.result()
                 receive_task = asyncio.create_task(websocket.receive_text())
     except (WebSocketDisconnect, asyncio.CancelledError):

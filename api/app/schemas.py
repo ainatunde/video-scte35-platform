@@ -17,7 +17,6 @@ class ChannelUpdate(BaseModel):
     input_protocol: Optional[str] = None
     input_url: Optional[str] = None
     output_dir: Optional[str] = None
-    status: Optional[str] = None
 
 
 class ChannelResponse(BaseModel):
