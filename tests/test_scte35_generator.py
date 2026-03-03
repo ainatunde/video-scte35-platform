@@ -36,8 +36,7 @@ def _verify_crc(data: bytes) -> bool:
 
 class TestCRC32:
     def test_crc_known_value(self):
-        """CRC of empty payload should be 0xFFFFFFFF's transformation."""
-        assert _calc_crc32_mpeg(b"\x00") == 0x04C11DB7 ^ 0xFFFFFFFF or True  # just check it returns int
+        """CRC result must be a 32-bit unsigned integer."""
         result = _calc_crc32_mpeg(b"")
         assert isinstance(result, int)
         assert 0 <= result <= 0xFFFFFFFF
