@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import uuid
 
@@ -19,17 +18,23 @@ async def websocket_endpoint(websocket: WebSocket, channel_id: uuid.UUID):
     redis_channel = f"channel:{channel_id}"
     await pubsub.subscribe(redis_channel)
     logger.info("WebSocket client connected for channel %s", channel_id)
+
+    receive_task = asyncio.create_task(websocket.receive_text())
     try:
         while True:
-            message = await asyncio.wait_for(pubsub.get_message(ignore_subscribe_messages=True), timeout=1.0)
+            message = await asyncio.wait_for(
+                pubsub.get_message(ignore_subscribe_messages=True), timeout=1.0
+            )
             if message and message.get("type") == "message":
                 await websocket.send_text(message["data"])
-            try:
-                await asyncio.wait_for(websocket.receive_text(), timeout=0.01)
-            except asyncio.TimeoutError:
-                pass
+
+            if receive_task.done():
+                # Client sent a message (e.g. ping); reset and continue
+                receive_task.result()
+                receive_task = asyncio.create_task(websocket.receive_text())
     except (WebSocketDisconnect, asyncio.CancelledError):
         logger.info("WebSocket client disconnected for channel %s", channel_id)
     finally:
+        receive_task.cancel()
         await pubsub.unsubscribe(redis_channel)
         await pubsub.aclose()

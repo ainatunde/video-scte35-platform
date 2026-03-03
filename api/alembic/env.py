@@ -10,7 +10,7 @@ from alembic import context
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.database import Base  # noqa: E402
-import app.models  # noqa: E402, F401 – ensure models are registered
+import app.models  # noqa: E402, F401 - ensure models are registered
 
 config = context.config
 if config.config_file_name is not None:

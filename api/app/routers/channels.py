@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
+from ..models import Channel
 from ..schemas import ChannelCreate, ChannelResponse, ChannelUpdate
 from ..services import channel_service
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/channels", tags=["channels"])
 
 
-async def _get_or_404(channel_id: uuid.UUID, db: AsyncSession) -> object:
+async def _get_or_404(channel_id: uuid.UUID, db: AsyncSession) -> Channel:
     channel = await channel_service.get_channel(db, channel_id)
     if not channel:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found")
