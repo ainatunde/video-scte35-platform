@@ -139,11 +139,12 @@ class ChannelRunner:
 
     def _inject_hls_marker(self, pts: float, payload: SCTE35Payload, duration_secs: float | None) -> None:
         """Inject SCTE-35 EXT-X-DATERANGE tag into HLS child manifests."""
+        segment_duration = 6  # matches PipelineConfig.segment_duration default
         for i in range(4):  # 4 renditions
             manifest_path = self._output_dir / f"stream_{i}.m3u8"
             if not manifest_path.exists():
                 continue
-            segment_seq = int(pts / 6)  # approximate, based on 6s segments
+            segment_seq = int(pts / segment_duration)
             injection = MarkerInjection(
                 scte35_hex=payload.hex,
                 scte35_base64=payload.base64,

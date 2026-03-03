@@ -43,13 +43,7 @@ def _encode_splice_time(pts_time: float | None) -> bytes:
         # time_specified_flag = 0, reserved = 0x7F
         return bytes([0x7F])
     ticks = int(pts_time * 90000) & 0x1FFFFFFFF
-    flag_and_reserved = 0xFE | ((ticks >> 32) & 0x01)  # time_specified_flag=1, reserved=0x3F shifted
-    # Correct encoding: 1 bit flag + 6 bits reserved + 33 bits pts
-    # Byte 0: 1 (flag) + 000001 (reserved=1 for alignment) + top 1 bit of pts
-    # Simplified canonical encoding:
-    byte0 = 0x80 | 0x7E & 0xFE  # time_specified_flag=1, reserved=0x3F (6 bits)
-    # Actually: [time_specified_flag(1)] [reserved(6)] [pts_time(33)]
-    # Pack as 40 bits (5 bytes): 1+6+33 = 40
+    # [time_specified_flag(1)] [reserved(6)] [pts_time(33)] = 40 bits (5 bytes)
     val = (1 << 39) | (0x3F << 33) | (ticks & 0x1FFFFFFFF)
     return val.to_bytes(5, "big")
 

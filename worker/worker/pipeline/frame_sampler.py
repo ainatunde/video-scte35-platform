@@ -61,6 +61,7 @@ class FrameSampler:
         frame_size = self._width * self._height * 3
         pts = 0.0
         pts_increment = 1.0 / self._sample_fps
+        proc = None
 
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -74,5 +75,5 @@ class FrameSampler:
         except Exception as exc:
             logger.error("Frame sampler error: %s", exc)
         finally:
-            if proc.poll() is None:
+            if proc is not None and proc.poll() is None:
                 proc.terminate()
